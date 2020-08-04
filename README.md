@@ -1,7 +1,7 @@
 Создание клиентов банка в тестовом режиме
 Запуск сервиса создания клиентов интернет - банка в тестовом режиме
 
-Build status
+[![Build status](https://ci.appveyor.com/api/projects/status/0srs7age2itcmcpv?svg=true)](https://ci.appveyor.com/project/lina108108/hw5-2)
 
 Начало работы:
 Установите необходимое ПО на компьютер.
@@ -35,22 +35,32 @@ IntelliJ IDEA
 В качестве тестового фреймфорка используйте JUnit, также подключите фреймфорк Selenide для поиска необходимых элементов:
 
 test {
+
     useJUnitPlatform()
     systemProperty 'selenide.headless', System.getProperty('selenide.headless')
 }
+
 
 Запуск системы в тестовом режиме.
 Создайте класс RegistrationDTO с полями login, password, status. Добавьте конструкторы.
 
 @Data
+
 @AllArgsConstructor
+
 @NoArgsConstructor
 
 public class RegistrationDto {
+
  private String login;
+ 
  private String password;
+ 
  private String status;
+ 
 }
+
+
 
 Создайте класс для генерации пользователей (GenerateUsers): валидных по всем параметрам и невалидных по одному из параметров.
 Класс должен содержать информацию по отправке запроса:
@@ -78,11 +88,14 @@ static void makeRegistration(RegistrationDto registrationDto) {
                         .statusCode(200);
     }
 }
+
+
 Создайте класс с тестовыми методами на разные сценарии:
-наличие пользователя
-статус пользователя "blocked"
-невалидный логин
-невалидный пароль
+- наличие пользователя
+- статус пользователя "blocked"
+- невалидный логин
+- невалидный пароль
+
 В тестовом методе вы должны получить пользователя посредством вызова метода генерации пользователя из класса GenerateUsers. В методы класса GenerateUsers зашита регистрация валидного пользователя и генерация пользователя с нужными параметрами. Пример:
 
 public static RegistrationDto generateUserInvalidLogin() {
@@ -93,12 +106,14 @@ public static RegistrationDto generateUserInvalidLogin() {
        makeRegistration(new RegistrationDto("vasya",password,status));
        return new RegistrationDto("petya",password,status);
    }
-Данные полученного пользователя вносятся в форму (элементы которой ищем с помощью Selenide), необходимо сравнить результат заполнения формы с ожидаемым поведением системы. Пример теста:
+   
+Данные полученного пользователя вносятся в форму (элементы которой ищем с помощью Selenide), необходимо сравнить результат заполнения формы с ожидаемым поведением системы.
+Пример теста:
 
 
- @Test 
+ @Test
+ 
     void shouldNotSubmitRequestLoginInvalid() 
-    
        RegistrationDto user = GenerateUsers.generateUserInvalidLogin();
        open("http://localhost:9999");
        SelenideElement form = $("[action]");
