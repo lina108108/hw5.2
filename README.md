@@ -1,31 +1,21 @@
-
-Создание клиентов банка в тестовом режиме.
-
+Создание клиентов банка в тестовом режиме
 Запуск сервиса создания клиентов интернет - банка в тестовом режиме
 
 Build status
-[![Build status](https://ci.appveyor.com/api/projects/status/0srs7age2itcmcpv?svg=true)](https://ci.appveyor.com/project/lina108108/hw5-2)
 
-Начало работы.
-
+Начало работы:
 Установите необходимое ПО на компьютер.
-
 Загрузите приложение app-ibank.jar
-
 Запустите приложение в тестовом режиме через терминал командой java -jar app-ibank.jar -P:profile=test
-Prerequisites
 
+Prerequisites:
 У Вас на ПК должены быть установлены:
+Браузер Google Chrome
+IntelliJ IDEA
+Создайте новый проект в IntelliJ IDEA: язык - Java 11, система сборки - Gradle. Подключите необходимые зависимости в buildgradle
 
-Браузер Google Chrome,
-IntelliJ IDEA.
 
-Создайте новый проект в IntelliJ IDEA:
- язык - Java 11, система сборки - Gradle.
- 
- Подключите необходимые зависимости в buildgradle:
-
-dependencies {
+    dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.1'
     testImplementation 'com.codeborne:selenide:5.11.0'
     testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.23'
@@ -38,8 +28,9 @@ dependencies {
     implementation 'org.jetbrains:annotations:15.0'
 
     testImplementation 'io.rest-assured:rest-assured:4.3.0'
-    testImplementation 'com.google.code.gson:gson:2.8.6'
-}
+    testImplementation 'com.google.code.gson:gson:2.8.6'}
+
+
 
 В качестве тестового фреймфорка используйте JUnit, также подключите фреймфорк Selenide для поиска необходимых элементов:
 
@@ -48,13 +39,13 @@ test {
     systemProperty 'selenide.headless', System.getProperty('selenide.headless')
 }
 
-Запуск системы в тестовом режиме:
-Создайте класс RegistrationDTO с полями login, password, status.
-Добавьте конструкторы.
+Запуск системы в тестовом режиме.
+Создайте класс RegistrationDTO с полями login, password, status. Добавьте конструкторы.
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
 public class RegistrationDto {
  private String login;
  private String password;
@@ -65,6 +56,7 @@ public class RegistrationDto {
 Класс должен содержать информацию по отправке запроса:
 
 private static RequestSpecification requestSpec = new RequestSpecBuilder()
+
             .setBaseUri("http://localhost")
             .setPort(9999)
             .setAccept(ContentType.JSON)
@@ -74,8 +66,10 @@ private static RequestSpecification requestSpec = new RequestSpecBuilder()
             
 А также метод, отправляющий пользователя на регистрацию:
 
- static void makeRegistration(RegistrationDto registrationDto) {
+static void makeRegistration(RegistrationDto registrationDto) {
+ 
         given()
+       
                 .spec(requestSpec)
                 .body(registrationDto)
                         .when()
@@ -84,7 +78,6 @@ private static RequestSpecification requestSpec = new RequestSpecBuilder()
                         .statusCode(200);
     }
 }
-
 Создайте класс с тестовыми методами на разные сценарии:
 наличие пользователя
 статус пользователя "blocked"
@@ -93,31 +86,34 @@ private static RequestSpecification requestSpec = new RequestSpecBuilder()
 В тестовом методе вы должны получить пользователя посредством вызова метода генерации пользователя из класса GenerateUsers. В методы класса GenerateUsers зашита регистрация валидного пользователя и генерация пользователя с нужными параметрами. Пример:
 
 public static RegistrationDto generateUserInvalidLogin() {
+
        Faker faker = new Faker(new Locale("en"));
        String password = faker.internet().password();
        String status = "active";
        makeRegistration(new RegistrationDto("vasya",password,status));
        return new RegistrationDto("petya",password,status);
    }
-
 Данные полученного пользователя вносятся в форму (элементы которой ищем с помощью Selenide), необходимо сравнить результат заполнения формы с ожидаемым поведением системы. Пример теста:
 
-@Test
-   void shouldNotSubmitRequestLoginInvalid() {
+
+ @Test 
+    void shouldNotSubmitRequestLoginInvalid() 
+    
        RegistrationDto user = GenerateUsers.generateUserInvalidLogin();
        open("http://localhost:9999");
        SelenideElement form = $("[action]");
        form.$(cssSelector("[data-test-id=login] input")).sendKeys(user.getLogin());
        form.$(cssSelector("[data-test-id=password] input")).sendKeys(user.getPassword());
-       form.$(cssSelector("[data-test-id=action-login] ")).click();
+       form.$(cssSelector("[data-test-id=action-login] ")).click()
        $(byText("Ошибка")).waitUntil(Condition.visible, 15000);
    }
-
+   
+   
 Если тест падает - должна быть проанализирована ошибка и оформлен bugreport.
 
-Запуск с CI.
+Запуск с CI
 
-Для настройки CI добавьте в локальный репозиторий файл .appveyor.yml
-Данный файл необходимо также загружить в удаленный репозиторий на GitHub вместе с проектом. После загрузки проекта на GitHub - добавьте проект в отслеживание системой AppVeyor.
+Для настройки CI добавьте в локальный репозиторий файл .appveyor.yml Данный файл необходимо также загружить в удаленный репозиторий на GitHub вместе с проектом. После загрузки проекта на GitHub - добавьте проект в отслеживание системой AppVeyor.
 
-Результаты сборки после каждого коммита будут видны в бейдже: [![Build status](https://ci.appveyor.com/api/projects/status/0srs7age2itcmcpv?svg=true)](https://ci.appveyor.com/project/lina108108/hw5-2)
+Результаты сборки после каждого коммита будут видны в бейдже: 
+ [![Build status](https://ci.appveyor.com/api/projects/status/0srs7age2itcmcpv?svg=true)](https://ci.appveyor.com/project/lina108108/hw5-2)
