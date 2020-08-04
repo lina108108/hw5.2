@@ -40,15 +40,18 @@ dependencies {
     testImplementation 'io.rest-assured:rest-assured:4.3.0'
     testImplementation 'com.google.code.gson:gson:2.8.6'
 }
+
 В качестве тестового фреймфорка используйте JUnit, также подключите фреймфорк Selenide для поиска необходимых элементов:
 
 test {
     useJUnitPlatform()
     systemProperty 'selenide.headless', System.getProperty('selenide.headless')
 }
-Запуск системы в тестовом режиме
 
-Создайте класс RegistrationDTO с полями login, password, status. Добавьте конструкторы.
+Запуск системы в тестовом режиме:
+Создайте класс RegistrationDTO с полями login, password, status.
+Добавьте конструкторы.
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -57,8 +60,10 @@ public class RegistrationDto {
  private String password;
  private String status;
 }
+
 Создайте класс для генерации пользователей (GenerateUsers): валидных по всем параметрам и невалидных по одному из параметров.
 Класс должен содержать информацию по отправке запроса:
+
 private static RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
             .setPort(9999)
@@ -66,7 +71,9 @@ private static RequestSpecification requestSpec = new RequestSpecBuilder()
             .setContentType(ContentType.JSON)
             .log(LogDetail.ALL)
             .build();
+            
 А также метод, отправляющий пользователя на регистрацию:
+
  static void makeRegistration(RegistrationDto registrationDto) {
         given()
                 .spec(requestSpec)
@@ -77,6 +84,7 @@ private static RequestSpecification requestSpec = new RequestSpecBuilder()
                         .statusCode(200);
     }
 }
+
 Создайте класс с тестовыми методами на разные сценарии:
 наличие пользователя
 статус пользователя "blocked"
@@ -91,6 +99,7 @@ public static RegistrationDto generateUserInvalidLogin() {
        makeRegistration(new RegistrationDto("vasya",password,status));
        return new RegistrationDto("petya",password,status);
    }
+
 Данные полученного пользователя вносятся в форму (элементы которой ищем с помощью Selenide), необходимо сравнить результат заполнения формы с ожидаемым поведением системы. Пример теста:
 
 @Test
@@ -103,10 +112,12 @@ public static RegistrationDto generateUserInvalidLogin() {
        form.$(cssSelector("[data-test-id=action-login] ")).click();
        $(byText("Ошибка")).waitUntil(Condition.visible, 15000);
    }
+
 Если тест падает - должна быть проанализирована ошибка и оформлен bugreport.
 
-Запуск с CI
+Запуск с CI.
 
-Для настройки CI добавьте в локальный репозиторий файл .appveyor.yml Данный файл необходимо также загружить в удаленный репозиторий на GitHub вместе с проектом. После загрузки проекта на GitHub - добавьте проект в отслеживание системой AppVeyor.
+Для настройки CI добавьте в локальный репозиторий файл .appveyor.yml
+Данный файл необходимо также загружить в удаленный репозиторий на GitHub вместе с проектом. После загрузки проекта на GitHub - добавьте проект в отслеживание системой AppVeyor.
 
 Результаты сборки после каждого коммита будут видны в бейдже: [![Build status](https://ci.appveyor.com/api/projects/status/0srs7age2itcmcpv?svg=true)](https://ci.appveyor.com/project/lina108108/hw5-2)
